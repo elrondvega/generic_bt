@@ -58,6 +58,7 @@ class GenericBTCoordinator(ActiveBluetoothDataUpdateCoordinator[None]):
         """Handle a Bluetooth event."""
         self.ble_device = service_info.device
         _LOGGER.debug(f"{DOMAIN} - _async_handle_bluetooth_event - {service_info} - {self.ble_device}")
+        _LOGGER.debug(f"{DOMAIN} - _async_handle_bluetooth_event - {service_info.manufacturer_data} - {self.ble_device}")
         self._ready_event.set()
 
         if not self._was_unavailable:
@@ -65,6 +66,7 @@ class GenericBTCoordinator(ActiveBluetoothDataUpdateCoordinator[None]):
 
         self._was_unavailable = False
         self.device.update_from_advertisement(service_info.advertisement)
+        self.device.manufacturer_data = service_info.manufacturer_data
         super()._async_handle_bluetooth_event(service_info, change)
 
     async def async_wait_ready(self) -> bool:

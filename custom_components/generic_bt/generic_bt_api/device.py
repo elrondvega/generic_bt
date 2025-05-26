@@ -11,6 +11,8 @@ from bleak.exc import BleakError
 _LOGGER = logging.getLogger(__name__)
 
 
+from typing import Any
+
 class GenericBTDevice:
     """Generic BT Device Class"""
     def __init__(self, ble_device):
@@ -18,6 +20,7 @@ class GenericBTDevice:
         self._client: BleakClient | None = None
         self._client_stack = AsyncExitStack()
         self._lock = asyncio.Lock()
+        self._manufacturer_data: dict[int, bytes] = {}
 
     async def update(self):
         pass
@@ -59,5 +62,10 @@ class GenericBTDevice:
         print(data)
         return data
 
-    def update_from_advertisement(self, advertisement):
+    def update_from_advertisement(self, advertisement: Any) -> None:
         pass
+
+    @property
+    def manufacturer_data(self) -> dict[int, bytes]:
+        """Return the manufacturer data."""
+        return self._manufacturer_data
