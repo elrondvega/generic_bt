@@ -20,7 +20,7 @@ class GenericBTDevice:
         self._client: BleakClient | None = None
         self._client_stack = AsyncExitStack()
         self._lock = asyncio.Lock()
-        self._manufacturer_data: dict[int, bytes] = {}
+        self._manufacturer_data: dict[int, str] = {}
 
     async def update(self):
         pass
@@ -66,6 +66,6 @@ class GenericBTDevice:
         pass
 
     @property
-    def manufacturer_data(self) -> dict[int, bytes]:
+    def manufacturer_data(self) -> dict[int, str]:
         """Return the manufacturer data."""
         return self._manufacturer_data

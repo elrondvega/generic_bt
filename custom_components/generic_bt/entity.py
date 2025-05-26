@@ -23,7 +23,7 @@ class GenericBTEntity(PassiveBluetoothCoordinatorEntity[GenericBTCoordinator]):
         self._device = coordinator.device
         self._address = coordinator.ble_device.address
         self._attr_unique_id = coordinator.base_unique_id
-        self._attr_extra_state_attributes = coordinator.device.manufacturer_data
+        self._attr_extra_state_attributes = coordinator.device._manufacturer_data
         self._attr_device_info = {
             "connections":{(dr.CONNECTION_BLUETOOTH, self._address)},
             "name":coordinator.device_name
