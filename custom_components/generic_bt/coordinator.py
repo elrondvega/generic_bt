@@ -61,14 +61,24 @@ class GenericBTCoordinator(ActiveBluetoothDataUpdateCoordinator[None]):
         _LOGGER.debug(f"{DOMAIN} - _async_handle_bluetooth_event - {service_info.manufacturer_data} - {self.ble_device}")
         self._ready_event.set()
 
-        if not self._was_unavailable:
-            return
+        # if not self._was_unavailable:
+        #    return
 
         self._was_unavailable = False
         self.device.update_from_advertisement(service_info.advertisement)
         # Extract the first manufacturer data item and convert its value to hex
         manufacturer_id, manufacturer_data = list(service_info.manufacturer_data.items())[0]
-        self.device._manufacturer_data = {manufacturer_id: bytes(manufacturer_data).hex()}
+        # handle different manufacturers
+        if manufacturer_id == 1076:
+            self.device._manufacturer_data = {manufacturer_id: bytes(manufacturer_data[5:]).hex()}
+        elif manufacturer_id == 65535:
+            if bytes(manufacturer_data[15]).hex == "25":
+                self.device._manufacturer_data = {manufacturer_id: bytes(manufacturer_data).hex(), mac_address: bytes(manufacturer_data[2:7]).hex(), size: (ord(manufacturer_data[18]) << 8 | ord(manufacturer_data[17])) / 100  }
+            else:
+                self.device._manufacturer_data = {manufacturer_id: bytes(manufacturer_data).hex(), mac_address: bytes(manufacturer_data[2:7]).hex() }
+        else:
+            self.device._manufacturer_data = {manufacturer_id: bytes(manufacturer_data).hex()}
+
         super()._async_handle_bluetooth_event(service_info, change)
 
     async def async_wait_ready(self) -> bool:
