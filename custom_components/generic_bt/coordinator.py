@@ -66,7 +66,9 @@ class GenericBTCoordinator(ActiveBluetoothDataUpdateCoordinator[None]):
 
         self._was_unavailable = False
         self.device.update_from_advertisement(service_info.advertisement)
-        self.device._manufacturer_data = { service_info.manufacturer_data.items()[0], bytes(service_info.manufacturer_data.values()[0]).hex() }
+        # Extract the first manufacturer data item and convert its value to hex
+        manufacturer_id, manufacturer_data = list(service_info.manufacturer_data.items())[0]
+        self.device._manufacturer_data = {manufacturer_id: bytes(manufacturer_data).hex()}
         super()._async_handle_bluetooth_event(service_info, change)
 
     async def async_wait_ready(self) -> bool:
