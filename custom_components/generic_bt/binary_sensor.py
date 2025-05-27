@@ -22,11 +22,12 @@ PARALLEL_UPDATES = 0
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
     """Set up Generic BT device based on a config entry."""
     coordinator: GenericBTCoordinator = hass.data[DOMAIN][entry.entry_id]
-    async_add_entities([GenericBTBinarySensor(coordinator)])
+    if coordinator.device.manufacturer_data.get("manufacturer_id") != 65535 and coordinator.device.manufacturer_data.get("manufacturer_id") != 1076:
+        async_add_entities([GenericBTBinarySensor(coordinator)])
 
-    platform = entity_platform.async_get_current_platform()
-    platform.async_register_entity_service("write_gatt", Schema.WRITE_GATT.value, "write_gatt")
-    platform.async_register_entity_service("read_gatt", Schema.READ_GATT.value, "read_gatt")
+        platform = entity_platform.async_get_current_platform()
+        platform.async_register_entity_service("write_gatt", Schema.WRITE_GATT.value, "write_gatt")
+        platform.async_register_entity_service("read_gatt", Schema.READ_GATT.value, "read_gatt")
 
 
 class GenericBTBinarySensor(GenericBTEntity, BinarySensorEntity):

@@ -19,7 +19,8 @@ PARALLEL_UPDATES = 0
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
     """Set up Generic BT device based on a config entry."""
     coordinator: GenericBTCoordinator = hass.data[DOMAIN][entry.entry_id]
-    async_add_entities([GenericBTManufacturerDataSensor(coordinator)])
+    if coordinator.device.manufacturer_data.get("manufacturer_id") == 65535 or coordinator.device.manufacturer_data.get("manufacturer_id") == 1076:
+        async_add_entities([GenericBTManufacturerDataSensor(coordinator)])
 
 class GenericBTManufacturerDataSensor(GenericBTEntity, SensorEntity):
     """Representation of a Generic BT Manufacturer Data Sensor."""
