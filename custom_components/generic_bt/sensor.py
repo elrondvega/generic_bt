@@ -19,7 +19,8 @@ PARALLEL_UPDATES = 0
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
     """Set up Generic BT device based on a config entry."""
     coordinator: GenericBTCoordinator = hass.data[DOMAIN][entry.entry_id]
-    async_add_entities([GenericBTManufacturerDataSensor(coordinator)])
+    if coordinator.device.manufacturer_data.get("manufacturer_id") == 65535 or coordinator.device.manufacturer_data.get("manufacturer_id") == 1076:
+        async_add_entities([GenericBTManufacturerDataSensor(coordinator)])
 
 class GenericBTManufacturerDataSensor(GenericBTEntity, SensorEntity):
     """Representation of a Generic BT Manufacturer Data Sensor."""
@@ -30,17 +31,25 @@ class GenericBTManufacturerDataSensor(GenericBTEntity, SensorEntity):
         """Initialize the sensor."""
         super().__init__(coordinator)
 
-    @property
-    def native_value(self) -> dict:
-        """Return the manufacturer data as the sensor value."""
+    def _get_manufacturer_data(self) -> dict:
+        """Return the manufacturer data from the device."""
         return self._device.manufacturer_data
 
     @property
-    def extra_state_attributes(self) -> dict:
+    def native_value(self) -> float | dict:
+        """Return the size value or manufacturer data based on manufacturer_id."""
+        manufacturer_data = self._get_manufacturer_data()
+        if manufacturer_data.get("manufacturer_id") == 65535:
+            return manufacturer_data.get("size", 0.0)
+        return manufacturer_data
+
+    @property
+    def extra_state_attributes(self) -> dict[str, any]:
         """Return the device state attributes."""
-        return {
-            "manufacturer_data": self._device.manufacturer_data,
-        }
+        manufacturer_data = self._get_manufacturer_data()
+        if manufacturer_data.get("manufacturer_id") == 65535:
+            return {"size": manufacturer_data.get("size", 0.0)}
+        return manufacturer_data
 
     @property
     def icon(self) -> str:
