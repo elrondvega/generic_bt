@@ -70,12 +70,14 @@ class GenericBTCoordinator(ActiveBluetoothDataUpdateCoordinator[None]):
         manufacturer_id, manufacturer_data = list(service_info.manufacturer_data.items())[0]
         # handle different manufacturers
         if manufacturer_id == 1076:
-            self.device._manufacturer_data = {manufacturer_id: bytes(manufacturer_data[5:]).hex()}
+            self.device._manufacturer_data = {manufacturer_id: bytes(manufacturer_data[6:]).hex()}
         elif manufacturer_id == 65535:
-            if bytes(manufacturer_data[15]).hex == "25":
-                self.device._manufacturer_data = {manufacturer_id: bytes(manufacturer_data).hex(), mac_address: bytes(manufacturer_data[2:7]).hex(), size: (ord(manufacturer_data[18]) << 8 | ord(manufacturer_data[17])) / 100  }
+            # _LOGGER.warning(f"{DOMAIN} - _async_handle_bluetooth_event - {manufacturer_data[15]}")
+            # 0x25 = 37
+            if manufacturer_data[15] == 37:
+                self.device._manufacturer_data = {manufacturer_id: bytes(manufacturer_data).hex(), "mac_address": bytes(manufacturer_data[2:8]).hex(), "size": (manufacturer_data[18] << 8 | manufacturer_data[17]) / 100  }
             else:
-                self.device._manufacturer_data = {manufacturer_id: bytes(manufacturer_data).hex(), mac_address: bytes(manufacturer_data[2:7]).hex() }
+                self.device._manufacturer_data = {manufacturer_id: bytes(manufacturer_data).hex(), "mac_address": bytes(manufacturer_data[2:8]).hex() }
         else:
             self.device._manufacturer_data = {manufacturer_id: bytes(manufacturer_data).hex()}
 
