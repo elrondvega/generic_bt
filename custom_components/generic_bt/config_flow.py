@@ -49,6 +49,22 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             await self.async_set_unique_id(discovery_info.address, raise_on_progress=False)
             self._abort_if_unique_id_configured()
             device = GenericBTDevice(discovery_info.device)
+            # Extract manufacturer data from the discovery info
+            if discovery_info.manufacturer_data:
+                # Extract the first manufacturer data item and convert its value to hex
+                manufacturer_id, manufacturer_data = list(discovery_info.manufacturer_data.items())[0]
+                # handle different manufacturers
+                if manufacturer_id == 1076:
+                    device._manufacturer_data = {manufacturer_id: bytes(manufacturer_data[6:]).hex()}
+                elif manufacturer_id == 65535:
+                    # 0x25 = 37
+                    if manufacturer_data[15] == 37:
+                        device._manufacturer_data = {manufacturer_id: bytes(manufacturer_data).hex(), "mac_address": bytes(manufacturer_data[2:8]).hex(), "size": (manufacturer_data[18] << 8 | manufacturer_data[17]) / 100  }
+                    else:
+                        device._manufacturer_data = {manufacturer_id: bytes(manufacturer_data).hex(), "mac_address": bytes(manufacturer_data[2:8]).hex() }
+                else:
+                    device._manufacturer_data = {manufacturer_id: bytes(manufacturer_data).hex()}
+
             try:
                 await device.update()
             except BLEAK_EXCEPTIONS:

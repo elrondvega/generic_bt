@@ -66,20 +66,6 @@ class GenericBTCoordinator(ActiveBluetoothDataUpdateCoordinator[None]):
 
         self._was_unavailable = False
         self.device.update_from_advertisement(service_info.advertisement)
-        # Extract the first manufacturer data item and convert its value to hex
-        manufacturer_id, manufacturer_data = list(service_info.manufacturer_data.items())[0]
-        # handle different manufacturers
-        if manufacturer_id == 1076:
-            self.device._manufacturer_data = {manufacturer_id: bytes(manufacturer_data[6:]).hex()}
-        elif manufacturer_id == 65535:
-            # _LOGGER.warning(f"{DOMAIN} - _async_handle_bluetooth_event - {manufacturer_data[15]}")
-            # 0x25 = 37
-            if manufacturer_data[15] == 37:
-                self.device._manufacturer_data = {manufacturer_id: bytes(manufacturer_data).hex(), "mac_address": bytes(manufacturer_data[2:8]).hex(), "size": (manufacturer_data[18] << 8 | manufacturer_data[17]) / 100  }
-            else:
-                self.device._manufacturer_data = {manufacturer_id: bytes(manufacturer_data).hex(), "mac_address": bytes(manufacturer_data[2:8]).hex() }
-        else:
-            self.device._manufacturer_data = {manufacturer_id: bytes(manufacturer_data).hex()}
 
         super()._async_handle_bluetooth_event(service_info, change)
 

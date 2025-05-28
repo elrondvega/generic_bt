@@ -19,7 +19,14 @@ PARALLEL_UPDATES = 0
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
     """Set up Generic BT device based on a config entry."""
     coordinator: GenericBTCoordinator = hass.data[DOMAIN][entry.entry_id]
-    if coordinator.device.manufacturer_data.get("manufacturer_id") == 65535 or coordinator.device.manufacturer_data.get("manufacturer_id") == 1076:
+    manufacturer_data = coordinator.device.manufacturer_data
+    # Ensure manufacturer_id is included in the data
+    if "manufacturer_id" not in manufacturer_data and manufacturer_data:
+        # Extract the manufacturer_id from the keys
+        manufacturer_id = list(manufacturer_data.keys())[0]
+        manufacturer_data["manufacturer_id"] = manufacturer_id
+
+    if manufacturer_data.get("manufacturer_id") == 65535 or manufacturer_data.get("manufacturer_id") == 1076:
         async_add_entities([GenericBTManufacturerDataSensor(coordinator)])
 
 class GenericBTManufacturerDataSensor(GenericBTEntity, SensorEntity):
@@ -33,7 +40,13 @@ class GenericBTManufacturerDataSensor(GenericBTEntity, SensorEntity):
 
     def _get_manufacturer_data(self) -> dict:
         """Return the manufacturer data from the device."""
-        return self._device.manufacturer_data
+        manufacturer_data = self._device.manufacturer_data
+        # Ensure manufacturer_id is included in the data
+        if "manufacturer_id" not in manufacturer_data and manufacturer_data:
+            # Extract the manufacturer_id from the keys
+            manufacturer_id = list(manufacturer_data.keys())[0]
+            manufacturer_data["manufacturer_id"] = manufacturer_id
+        return manufacturer_data
 
     @property
     def native_value(self) -> float | dict:
