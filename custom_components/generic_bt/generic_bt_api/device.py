@@ -21,6 +21,8 @@ class GenericBTDevice:
         self._client_stack = AsyncExitStack()
         self._lock = asyncio.Lock()
         self._manufacturer_data: dict[int, str] = {}
+        # Initialize manufacturer_data with the device's address
+        self._manufacturer_data["device_address"] = ble_device.address
 
     async def update(self):
         pass
@@ -63,7 +65,21 @@ class GenericBTDevice:
         return data
 
     def update_from_advertisement(self, advertisement: Any) -> None:
-        pass
+        """Update the device from a Bluetooth advertisement."""
+        if advertisement.manufacturer_data:
+            # Extract the first manufacturer data item and convert its value to hex
+            manufacturer_id, manufacturer_data = list(advertisement.manufacturer_data.items())[0]
+            # handle different manufacturers
+            if manufacturer_id == 1076:
+                self._manufacturer_data = {manufacturer_id: bytes(manufacturer_data[6:]).hex()}
+            elif manufacturer_id == 65535:
+                # 0x25 = 37
+                if manufacturer_data[15] == 37:
+                    self._manufacturer_data = {manufacturer_id: bytes(manufacturer_data).hex(), "mac_address": bytes(manufacturer_data[2:8]).hex(), "size": (manufacturer_data[18] << 8 | manufacturer_data[17]) / 100  }
+                else:
+                    self._manufacturer_data = {manufacturer_id: bytes(manufacturer_data).hex(), "mac_address": bytes(manufacturer_data[2:8]).hex() }
+            else:
+                self._manufacturer_data = {manufacturer_id: bytes(manufacturer_data).hex()}
 
     @property
     def manufacturer_data(self) -> dict[int, str]:
