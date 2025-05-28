@@ -28,7 +28,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     device = GenericBTDevice(ble_device)
 
     # Get the service info to extract manufacturer data
-    service_info = await bluetooth.async_get_service_info_async(hass, ble_device.address)
+    service_info = bluetooth.async_last_service_info(hass, ble_device.address)
     if service_info and service_info.manufacturer_data:
         # Extract the first manufacturer data item and convert its value to hex
         manufacturer_id, manufacturer_data = list(service_info.manufacturer_data.items())[0]

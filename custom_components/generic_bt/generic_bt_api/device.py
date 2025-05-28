@@ -64,11 +64,11 @@ class GenericBTDevice:
         print(data)
         return data
 
-    def update_from_advertisement(self, advertisement: Any) -> None:
+    def update_from_advertisement(self, service_info: Any) -> None:
         """Update the device from a Bluetooth advertisement."""
-        if advertisement.manufacturer_data:
+        if service_info.manufacturer_data:
             # Extract the first manufacturer data item and convert its value to hex
-            manufacturer_id, manufacturer_data = list(advertisement.manufacturer_data.items())[0]
+            manufacturer_id, manufacturer_data = list(service_info.manufacturer_data.items())[0]
             # handle different manufacturers
             if manufacturer_id == 1076:
                 self._manufacturer_data = {manufacturer_id: bytes(manufacturer_data[6:]).hex()}

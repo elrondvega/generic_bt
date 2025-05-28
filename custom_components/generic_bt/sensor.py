@@ -61,7 +61,7 @@ class GenericBTManufacturerDataSensor(GenericBTEntity, SensorEntity):
         """Return the device state attributes."""
         manufacturer_data = self._get_manufacturer_data()
         if manufacturer_data.get("manufacturer_id") == 65535:
-            return {"size": manufacturer_data.get("size", 0.0)}
+            return {"size": manufacturer_data.get("size", 0.0), "mac_address": manufacturer_data.get("mac_address"), "manufacturer_data": manufacturer_data.get(65535)}
         return manufacturer_data
 
     @property
